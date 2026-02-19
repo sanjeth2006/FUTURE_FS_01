@@ -4,6 +4,48 @@ import { userData } from '../data/portfolio';
 import { motion } from 'framer-motion';
 
 const Contact = () => {
+    const [formData, setFormData] = React.useState({
+        name: '',
+        email: '',
+        message: ''
+    });
+    const [status, setStatus] = React.useState(''); // '', 'loading', 'success', 'error'
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setStatus('loading');
+
+        try {
+            const response = await fetch('http://localhost:5000/api/leads/external', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    message: formData.message,
+                    source: 'Portfolio Website'
+                })
+            });
+
+            if (response.ok) {
+                setStatus('success');
+                setFormData({ name: '', email: '', message: '' });
+                setTimeout(() => setStatus(''), 5000);
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setStatus('error');
+        }
+    };
+
     return (
         <section id="contact" className="py-32 px-6 relative z-10 overflow-hidden">
             {/* Background glow for contact section - Steel/Cyan */}
@@ -26,59 +68,126 @@ const Contact = () => {
                     </p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                    <motion.a
-                        href={userData.social.email}
-                        whileHover={{ y: -10 }}
-                        className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center text-center group hover:bg-white/10 border-white/5"
-                    >
-                        <div className="p-4 bg-slate-700/30 rounded-full text-slate-300 mb-4 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(203,213,225,0.1)]">
-                            <Mail size={32} />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-1">Email Me</h3>
-                        <span className="text-slate-400 text-sm group-hover:text-cyan-300 transition-colors">{userData.profile.email}</span>
-                    </motion.a>
+                <div className="grid md:grid-cols-2 gap-12">
+                    {/* Social Links Column */}
+                    <div className="space-y-6">
+                        <motion.a
+                            href={userData.social.email}
+                            whileHover={{ y: -5 }}
+                            className="glass-card p-6 rounded-2xl flex items-center gap-4 group hover:bg-white/10 border-white/5"
+                        >
+                            <div className="p-3 bg-slate-700/30 rounded-full text-slate-300 group-hover:scale-110 transition-transform">
+                                <Mail size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">Email Me</h3>
+                                <span className="text-slate-400 text-sm">{userData.profile.email}</span>
+                            </div>
+                        </motion.a>
 
-                    <motion.a
-                        href={userData.social.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ y: -10 }}
-                        className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center text-center group hover:bg-white/10 border-white/5"
-                    >
-                        <div className="p-4 bg-blue-900/20 rounded-full text-blue-400 mb-4 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(96,165,250,0.1)]">
-                            <Linkedin size={32} />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-1">LinkedIn</h3>
-                        <span className="text-slate-400 text-sm group-hover:text-blue-300 transition-colors">Connect professionally</span>
-                    </motion.a>
+                        <motion.a
+                            href={userData.social.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ y: -5 }}
+                            className="glass-card p-6 rounded-2xl flex items-center gap-4 group hover:bg-white/10 border-white/5"
+                        >
+                            <div className="p-3 bg-blue-900/20 rounded-full text-blue-400 group-hover:scale-110 transition-transform">
+                                <Linkedin size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">LinkedIn</h3>
+                                <span className="text-slate-400 text-sm">Connect professionally</span>
+                            </div>
+                        </motion.a>
 
-                    <motion.a
-                        href={userData.social.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ y: -10 }}
-                        className="glass-card p-8 rounded-2xl flex flex-col items-center justify-center text-center group hover:bg-white/10 border-white/5"
+                        <motion.a
+                            href={userData.social.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ y: -5 }}
+                            className="glass-card p-6 rounded-2xl flex items-center gap-4 group hover:bg-white/10 border-white/5"
+                        >
+                            <div className="p-3 bg-gray-700/30 rounded-full text-white group-hover:scale-110 transition-transform">
+                                <Github size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">GitHub</h3>
+                                <span className="text-slate-400 text-sm">Checkout my code</span>
+                            </div>
+                        </motion.a>
+                    </div>
+
+                    {/* Contact Form Column */}
+                    <motion.form
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        onSubmit={handleSubmit}
+                        className="glass-card p-8 rounded-2xl border-white/5 space-y-4"
                     >
-                        <div className="p-4 bg-gray-700/30 rounded-full text-white mb-4 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                            <Github size={32} />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
+                                placeholder="Your Name"
+                            />
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-1">GitHub</h3>
-                        <span className="text-slate-400 text-sm group-hover:text-white transition-colors">Checkout my code</span>
-                    </motion.a>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
+                                placeholder="your@email.com"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Message</label>
+                            <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
+                                required
+                                rows="4"
+                                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all resize-none"
+                                placeholder="How can I help you?"
+                            ></textarea>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={status === 'loading' || status === 'success'}
+                            className={`w-full py-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${status === 'success'
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-gradient-to-r from-slate-700 to-gray-600 hover:from-slate-600 hover:to-gray-500 text-white shadow-lg'
+                                }`}
+                        >
+                            {status === 'loading' ? (
+                                <span>Sending...</span>
+                            ) : status === 'success' ? (
+                                <span>Message Sent!</span>
+                            ) : (
+                                <>
+                                    <span>Send Message</span>
+                                    <Send size={18} />
+                                </>
+                            )}
+                        </button>
+
+                        {status === 'error' && (
+                            <p className="text-red-400 text-sm text-center">Failed to send message. Please try again.</p>
+                        )}
+                    </motion.form>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-16 text-center"
-                >
-                    <a href={`mailto:${userData.profile.email}`} className="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-slate-700 to-gray-600 hover:from-slate-600 hover:to-gray-500 rounded-full text-white font-bold shadow-lg shadow-gray-900/40 hover:scale-105 transition-transform border border-white/10">
-                        <span>Send a Message</span>
-                        <Send size={20} />
-                    </a>
-                </motion.div>
             </div>
         </section>
     );
